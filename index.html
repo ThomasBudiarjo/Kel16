@@ -12,20 +12,36 @@
   <div id="modalRoot" class="hidden"></div>
 
   <section id="loginScreen" class="login-screen">
-    <div class="login-card">
-      <div class="brand-mark">HPLC</div>
-      <h1>HPLC-UV CSV Validation System</h1>
-      <p class="muted">Computerized System Validation workspace</p>
-
-      <form id="loginForm">
-        <label>Username</label>
-        <input id="usernameInput" type="text" autocomplete="username" placeholder="Enter username" required>
-        <label>Password</label>
-        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Enter password" required>
-        <button class="primary full" type="submit">Sign In</button>
-      </form>
-
-      <div id="loginMessage" class="error-message"></div>
+    <div class="login-shell">
+      <div class="login-story">
+        <div class="login-story-brand"><div class="brand-mark">HPLC</div><div><b>HPLC-UV</b><span>CSV System</span></div></div>
+        <div class="login-story-copy">
+          <span class="login-kicker">CONTROLLED VALIDATION WORKSPACE</span>
+          <h1>Trusted analysis starts with traceable validation.</h1>
+          <p>Execute, review, and approve HPLC-UV validation activities in one controlled workspace.</p>
+        </div>
+        <div class="login-story-meta">
+          <div><span>System</span><b>HPLC-UV-001</b></div>
+          <div><span>Software</span><b>v1.0.0</b></div>
+          <div><span>Integrity</span><b>ALCOA+</b></div>
+        </div>
+      </div>
+      <div class="login-card">
+        <div class="login-card-head">
+          <span class="login-status"><i></i> System ready</span>
+          <h2>Welcome back</h2>
+          <p>Sign in to continue to your validation workspace.</p>
+        </div>
+        <form id="loginForm">
+          <label>Username</label>
+          <input id="usernameInput" type="text" autocomplete="username" placeholder="Enter username" required>
+          <label>Password</label>
+          <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Enter password" required>
+          <button class="primary full" type="submit">Sign In <i data-lucide="arrow-right"></i></button>
+        </form>
+        <div id="loginMessage" class="error-message"></div>
+        <p class="login-help">Access is restricted to authorized Quality Control, Quality Assurance, and system administration personnel.</p>
+      </div>
     </div>
   </section>
 
@@ -35,7 +51,6 @@
         <div class="brand-mark small">HPLC</div>
         <div><b>HPLC-UV</b><span>CSV System</span></div>
       </div>
-      <div id="userBadge" class="user-badge"></div>
       <nav id="mainNav">
         <button data-section="dashboard" class="nav-item active">Dashboard</button>
         <div class="nav-group-label">HPLC ANALYSIS</div>
@@ -53,7 +68,15 @@
         <div class="nav-group-label">SYSTEM</div>
         <button data-section="admin" class="nav-item"><i data-lucide="settings"></i><span>Administration</span></button>
       </nav>
-      <button id="logoutBtn" class="logout"><i data-lucide="log-out"></i> Log Out</button>
+      <div class="sidebar-footer">
+        <button class="sidebar-system" id="sidebarSystemStatus" type="button">
+          <span class="sidebar-ready-dot"></span>
+          <span><b>System Ready</b><small>HPLC-UV-001 · v1.0.0</small></span>
+          <i data-lucide="chevron-right"></i>
+        </button>
+        <div id="userBadge" class="user-badge"></div>
+        <button id="logoutBtn" class="logout"><i data-lucide="log-out"></i> Log Out</button>
+      </div>
     </aside>
 
     <main class="content">
@@ -68,87 +91,72 @@
       <section id="dashboard" class="page-section">
         <div class="dashboard-head">
           <div class="dashboard-welcome-only">
-            <p id="dashboardWelcome">Welcome back, QC. Here’s an overview of the HPLC-UV CSV validation status.</p>
+            <span class="dashboard-date">HPLC-UV-001 · CONTROLLED WORKSPACE</span>
+            <h1>Good morning, <span id="dashboardGreetingRole">Quality Control</span></h1>
+            <p id="dashboardWelcome">Here’s what needs your attention across the validation workspace.</p>
           </div>
           <div class="dashboard-head-actions">
-            <div class="dashboard-search"><i data-lucide="search"></i><input id="dashboardSearch" type="search" placeholder="Search anything..."></div>
+            <div class="dashboard-search"><i data-lucide="search"></i><input id="dashboardSearch" type="search" placeholder="Search tests, sequences, or documents..."><kbd>⌘ K</kbd></div>
             <button class="icon-button" id="dashboardNotificationsBtn" type="button" aria-label="Notifications"><i data-lucide="bell"></i><span class="notification-dot">3</span></button>
             <button class="dashboard-user" id="dashboardUserMenuBtn" type="button" aria-label="Open user menu"><span class="avatar"><i data-lucide="user"></i></span><b id="dashboardUserName">Quality Control</b><i data-lucide="chevron-down"></i></button>
           </div>
         </div>
 
-        <div class="dashboard-status-row">
-          <div class="dashboard-system-version">
-            <div class="status-pill"><span class="dot"></span> System Ready</div>
-            <small>HPLC-UV-001 | v1.0.0</small>
+        <div class="validation-position">
+          <div class="validation-position-main">
+            <span>Validation position</span>
+            <div class="validation-position-value"><strong id="dashExecutedCount">0</strong><b>of <span id="dashTotalTests">17</span> executed</b></div>
+            <div class="validation-position-track"><i id="dashProgressBar"></i></div>
+            <small><span id="dashOverallProgress">0%</span> complete</small>
           </div>
+          <button class="validation-phase" data-dashboard-card="total" type="button"><span>IQ</span><strong id="dashIQCount">3</strong><small>Installation</small></button>
+          <button class="validation-phase" data-dashboard-card="total" type="button"><span>OQ</span><strong id="dashOQCount">10</strong><small>Operational</small></button>
+          <button class="validation-phase" data-dashboard-card="total" type="button"><span>PQ</span><strong id="dashPQCount">4</strong><small>Performance</small></button>
         </div>
 
-        <div class="dashboard-stats">
-          <button class="dashboard-stat" data-dashboard-card="total" type="button"><div class="dash-icon"><i data-lucide="file-check-2"></i></div><div><span>Total Tests</span><strong id="dashTotalTests">17</strong><small>IQ: 7 | OQ: 6 | PQ: 4</small></div></button>
-          <button class="dashboard-stat pending" data-dashboard-card="pending" type="button"><div class="dash-icon"><i data-lucide="clock-3"></i></div><div><span>Pending Execution</span><strong id="dashPendingExecution">17</strong></div></button>
-          <button class="dashboard-stat review" data-dashboard-card="review" type="button"><div class="dash-icon"><i data-lucide="file-check-2"></i></div><div><span>Pending QA Review</span><strong id="dashPendingReview">0</strong></div></button>
-          <button class="dashboard-stat approved" data-dashboard-card="approved" type="button"><div class="dash-icon"><i data-lucide="check"></i></div><div><span>Approved</span><strong id="dashApproved">0</strong></div></button>
-          <button class="dashboard-stat failed" data-dashboard-card="failed" type="button"><div class="dash-icon"><i data-lucide="x"></i></div><div><span>Failed</span><strong id="dashFailed">0</strong></div></button>
-          <button class="dashboard-stat progress" data-dashboard-card="progress" type="button"><div class="dash-icon"><i data-lucide="circle-dot"></i></div><div><span>Overall Progress</span><strong id="dashOverallProgress">0%</strong><div class="progress-track"><i id="dashProgressBar"></i></div></div></button>
+        <div class="dashboard-state-strip">
+          <button data-dashboard-card="pending" type="button"><span class="state-dot pending"></span><b id="dashPendingExecution">17</b> Pending execution</button>
+          <button data-dashboard-card="review" type="button"><span class="state-dot review"></span><b id="dashPendingReview">0</b> Pending QA</button>
+          <button data-dashboard-card="approved" type="button"><span class="state-dot approved"></span><b id="dashApproved">0</b> Approved</button>
+          <button data-dashboard-card="failed" type="button"><span class="state-dot failed"></span><b id="dashFailed">0</b> Failed</button>
+          <span class="dashboard-integrity"><i data-lucide="shield-check"></i> ALCOA+ controlled</span>
         </div>
 
-        <div class="dashboard-grid-top">
-          <div class="panel dashboard-panel">
-            <div class="panel-head"><h3>Validation Progress</h3></div>
-            <div class="validation-chart">
-              <div class="chart-y-labels"><span>100</span><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span></div>
-              <div class="bar-chart" id="validationBarChart">
-                <div class="bar-col"><div class="bar-stack"><i></i><b></b></div><span>IQ</span></div>
-                <div class="bar-col"><div class="bar-stack"><i></i><b></b></div><span>OQ</span></div>
-                <div class="bar-col"><div class="bar-stack"><i></i><b></b></div><span>PQ</span></div>
-              </div>
+        <div class="dashboard-workspace">
+          <div class="dashboard-ledger">
+            <div class="ledger-head">
+              <div><h2>Validation work queue</h2><p>Prioritized tests requiring execution or review.</p></div>
+              <button class="secondary" id="dashboardViewTasksBtn" type="button">View all tests <i data-lucide="arrow-up-right"></i></button>
             </div>
-            <div class="chart-legend"><span><i class="legend-completed"></i>Completed</span><span><i class="legend-remaining"></i>Remaining</span></div>
+            <div class="dashboard-table-wrap"><table class="dashboard-table dashboard-task-ledger"><thead><tr><th>Test</th><th>Phase</th><th>Status</th><th>Owner</th><th>Due date</th><th>Evidence</th><th></th></tr></thead><tbody id="dashboardTasksBody"></tbody></table></div>
           </div>
-
-          <div class="panel dashboard-panel">
-            <div class="panel-head"><h3>Test Status Breakdown</h3></div>
-            <div class="donut-layout">
-              <div class="donut" id="statusDonut"><div><strong id="donutTotal">17</strong><span>Total Tests</span></div></div>
-              <div class="donut-legend">
-                <div><i class="legend-dot pending-dot"></i><span>Pending Execution</span><b id="donutPending">17 (100%)</b></div>
-                <div><i class="legend-dot review-dot"></i><span>Pending QA Review</span><b id="donutReview">0 (0%)</b></div>
-                <div><i class="legend-dot approved-dot"></i><span>Approved</span><b id="donutApproved">0 (0%)</b></div>
-                <div><i class="legend-dot failed-dot"></i><span>Failed</span><b id="donutFailed">0 (0%)</b></div>
-              </div>
+          <aside class="dashboard-rail">
+            <div class="dashboard-next-action">
+              <div class="next-copy"><span>NEXT ACTION</span><h3 id="dashboardNextAction">Begin IQ-001</h3><small id="dashboardNextDetail">System identification</small></div>
+              <button class="primary" id="dashboardGoValidation" type="button">Begin test <i data-lucide="arrow-right"></i></button>
             </div>
-          </div>
-
-          <div class="panel dashboard-panel">
-            <div class="panel-head"><h3>System Information</h3><span class="badge">Controlled</span></div>
-            <div class="system-info-list">
-              <div><span>Application</span><b>HPLC-UV CSV System</b></div>
-              <div><span>System ID</span><b>HPLC-UV-001</b></div>
+            <div class="rail-section system-overview">
+              <div class="rail-head"><h3>System overview</h3><span class="live-status"><i></i> Live</span></div>
+              <div><span>System</span><b>HPLC-UV-001</b></div>
               <div><span>Detector</span><b>UV/Vis</b></div>
-              <div><span>Software Version</span><b>1.0.0</b></div>
-              <div><span>Data Integrity</span><b>ALCOA+ principles</b></div>
-              <div><span>Last Validation</span><b id="dashLastValidation">—</b></div>
-              <div><span>Next Due</span><b id="dashNextDue">—</b></div>
+              <div><span>Software</span><b>v1.0.0</b></div>
+              <div><span>Last validation</span><b id="dashLastValidation">—</b></div>
+              <div><span>Next due</span><b id="dashNextDue">—</b></div>
             </div>
-          </div>
+            <div class="rail-section recent-activity">
+              <div class="rail-head"><h3>Recent activity</h3><button id="dashboardViewAuditBtn" type="button">View all</button></div>
+              <div class="dashboard-table-wrap"><table class="dashboard-table"><tbody id="dashboardRecentBody"></tbody></table></div>
+            </div>
+          </aside>
         </div>
 
-        <div class="dashboard-grid-bottom">
-          <div class="panel dashboard-panel">
-            <div class="panel-head"><h3>Recent Activity</h3><button class="secondary small-action" id="dashboardViewAuditBtn" type="button">View All</button></div>
-            <div class="dashboard-table-wrap"><table class="dashboard-table"><thead><tr><th>Date/Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="dashboardRecentBody"></tbody></table></div>
+        <div class="dashboard-mobile-summary" aria-hidden="true">
+          <div id="validationBarChart">
+            <div class="bar-col"><div class="bar-stack"><i></i><b></b></div><span>IQ</span></div>
+            <div class="bar-col"><div class="bar-stack"><i></i><b></b></div><span>OQ</span></div>
+            <div class="bar-col"><div class="bar-stack"><i></i><b></b></div><span>PQ</span></div>
           </div>
-          <div class="panel dashboard-panel">
-            <div class="panel-head"><h3>My Tasks</h3><button class="secondary small-action" id="dashboardViewTasksBtn" type="button">View All</button></div>
-            <div class="dashboard-table-wrap"><table class="dashboard-table"><thead><tr><th>Task</th><th>Module</th><th>Priority</th><th>Due Date</th></tr></thead><tbody id="dashboardTasksBody"></tbody></table></div>
-          </div>
-        </div>
-
-        <div class="dashboard-next-action">
-          <div class="next-icon"><i data-lucide="lightbulb"></i></div>
-          <div class="next-copy"><h3>Next Action</h3><p id="dashboardNextAction">You have validation tests pending execution.</p><small id="dashboardNextDetail">Start with IQ-001 to begin the validation process.</small></div>
-          <button class="primary" id="dashboardGoValidation" type="button"><i data-lucide="arrow-right"></i> Go to CSV Validation Center</button>
+          <div id="statusDonut"><strong id="donutTotal">17</strong><span id="donutPending"></span><span id="donutReview"></span><span id="donutApproved"></span><span id="donutFailed"></span></div>
         </div>
       </section>
 

@@ -171,10 +171,10 @@
     const body = $("dashboardRecentBody");
     if (!body) return;
     if (!audit.length) {
-      body.innerHTML = '<tr><td colspan="4" class="dashboard-empty">No activity recorded yet.</td></tr>';
+      body.innerHTML = '<tr><td class="dashboard-empty">No activity recorded yet.</td></tr>';
       return;
     }
-    body.innerHTML = audit.slice(0,5).map(a => `<tr><td>${escapeHtml(a.time)}</td><td>${escapeHtml(String(a.user||"system").toUpperCase())}</td><td>${escapeHtml(a.action)}</td><td>${escapeHtml(a.details)}</td></tr>`).join("");
+    body.innerHTML = audit.slice(0,5).map(a => `<tr><td><div class="activity-ledger-row"><span class="activity-ledger-icon"><i data-lucide="${String(a.action||"").toLowerCase().includes("login")?"log-in":"file-check-2"}"></i></span><div><b>${escapeHtml(a.action)}</b><span>${escapeHtml(a.details)}</span><small>${escapeHtml(a.time)} · ${escapeHtml(String(a.user||"system").toUpperCase())}</small></div></div></td></tr>`).join("");
   }
 
   function renderDashboardCharts(cases) {
@@ -194,6 +194,10 @@
     $("dashFailed").textContent = failed;
     $("dashOverallProgress").textContent = `${pct(executed)}%`;
     $("dashProgressBar").style.width = `${pct(executed)}%`;
+    if ($("dashExecutedCount")) $("dashExecutedCount").textContent = executed;
+    if ($("dashIQCount")) $("dashIQCount").textContent = cases.filter(t=>t.phase==="IQ").length;
+    if ($("dashOQCount")) $("dashOQCount").textContent = cases.filter(t=>t.phase==="OQ").length;
+    if ($("dashPQCount")) $("dashPQCount").textContent = cases.filter(t=>t.phase==="PQ").length;
     $("donutTotal").textContent = cases.length;
     $("donutPending").textContent = `${pendingExecution} (${pct(pendingExecution)}%)`;
     $("donutReview").textContent = `${pendingReview} (${pct(pendingReview)}%)`;
@@ -228,13 +232,21 @@
   function renderDashboardTasks(cases) {
     const body=$("dashboardTasksBody");
     if(!body) return;
-    const tasks=[];
-    cases.filter(t=>!state.validation[t.id]?.executedAt).slice(0,5).forEach((t,idx)=>tasks.push({task:`Execute ${t.id}`,module:"CSV Validation Center",priority:idx<2?"High":"Medium",due:"15 Sep 2026"}));
-    if (tasks.length===0 && isQA()) {
-      cases.filter(t=>state.validation[t.id]?.reviewStatus==="Pending QA Review").slice(0,5).forEach(t=>tasks.push({task:`Review ${t.id}`,module:"CSV Validation Center",priority:"High",due:"15 Sep 2026"}));
-    }
-    if(!tasks.length) tasks.push({task:"No pending task",module:"—",priority:"Low",due:"—"});
-    body.innerHTML=tasks.map(t=>`<tr><td><span class="task-mark"><i data-lucide="file-check-2"></i></span>${escapeHtml(t.task)}</td><td>${escapeHtml(t.module)}</td><td><span class="priority ${t.priority.toLowerCase()}">${escapeHtml(t.priority)}</span></td><td>${escapeHtml(t.due)}</td></tr>`).join("");
+    let tasks=cases.filter(t=>!state.validation[t.id]?.executedAt).slice(0,9);
+    if (!tasks.length && isQA()) tasks=cases.filter(t=>state.validation[t.id]?.reviewStatus==="Pending QA Review").slice(0,9);
+    if(!tasks.length){body.innerHTML='<tr><td colspan="7" class="dashboard-empty">No pending validation work.</td></tr>';return;}
+    const attachments=getAttachments();
+    body.innerHTML=tasks.map(t=>{
+      const result=state.validation[t.id]||{};
+      const status=result.reviewStatus==="Pending QA Review"?"Pending QA":result.executedAt?(result.testResult||"Executed"):"Not started";
+      const statusClass=status==="Pending QA"?"review":status==="PASS"?"pass":status==="FAIL"?"fail":"pending";
+      const evidence=attachments.filter(a=>a.recordId===t.id).length;
+      return `<tr class="dashboard-task-row" data-validation-id="${escapeHtml(t.id)}"><td><b class="dashboard-test-id">${escapeHtml(t.id)}</b><span>${escapeHtml(t.title)}</span></td><td><span class="phase-chip ${t.phase.toLowerCase()}">${escapeHtml(t.phase)}</span></td><td><span class="dashboard-status-chip ${statusClass}">${escapeHtml(status)}</span></td><td>${escapeHtml(displayUsername(state.user?.username||"QC"))}</td><td>15 Sep 2026</td><td>${evidence} file${evidence===1?"":"s"}</td><td><button class="ledger-open" type="button" aria-label="Open ${escapeHtml(t.id)}"><i data-lucide="chevron-right"></i></button></td></tr>`;
+    }).join("");
+    body.querySelectorAll(".dashboard-task-row").forEach(row=>row.addEventListener("click",()=>{
+      showSection("validation");
+      setTimeout(()=>{if($("validationSearch")){ $("validationSearch").value=row.dataset.validationId; renderValidation(); }},0);
+    }));
   }
 
   function updateDashboard() {
@@ -250,15 +262,16 @@
     if ($("dashTotalTests")) renderDashboardCharts(cases);
     if ($("dashboardTasksBody")) renderDashboardTasks(cases);
     if ($("dashboardUserName")) $("dashboardUserName").textContent = fullRole();
+    if ($("dashboardGreetingRole")) $("dashboardGreetingRole").textContent = fullRole();
     if ($("dashboardWelcome")) {
-      const roleName = state.user?.role === "QA" ? "QA" : state.user?.role === "Admin" ? "Admin" : state.user?.role === "QC" ? "QC" : "User";
-      $("dashboardWelcome").textContent = `Welcome back, ${roleName}. Here’s an overview of the HPLC-UV CSV validation status.`;
+      $("dashboardWelcome").textContent = "Here’s what needs your attention across the validation workspace.";
     }
     const nextPending = cases.find(t=>!state.validation[t.id]?.executedAt);
     if ($("dashboardNextAction")) {
-      $("dashboardNextAction").textContent = nextPending ? `You have ${cases.filter(t=>!state.validation[t.id]?.executedAt).length} validation test(s) pending execution.` : "All validation tests have been executed.";
-      $("dashboardNextDetail").textContent = nextPending ? `Start with ${nextPending.id} to begin the validation process.` : "Continue with QA review and validation report activities.";
+      $("dashboardNextAction").textContent = nextPending ? `Begin ${nextPending.id}` : "Execution complete";
+      $("dashboardNextDetail").textContent = nextPending ? nextPending.title : "Continue with QA review and reporting.";
     }
+    refreshIcons();
   }
 
   function escapeHtml(value) {
@@ -915,7 +928,7 @@ function initEvents() {
   function saveChromatograms(x){localStorage.setItem("hplc_chromatograms",JSON.stringify(x));}
 
   function renderUserBadge(){
-    $("userBadge").innerHTML=`<b>${escapeHtml(fullRole())}</b><br><span>${escapeHtml(displayUsername(state.user?.username||""))}</span>`;
+    $("userBadge").innerHTML=`<span class="sidebar-avatar">${escapeHtml((state.user?.role||"U").slice(0,2).toUpperCase())}</span><span><b>${escapeHtml(fullRole())}</b><small>${escapeHtml(displayUsername(state.user?.username||""))}</small></span>`;
   }
 
   function getAllURS(){
@@ -1540,7 +1553,7 @@ function initEvents() {
     $("pendingReviewCount").textContent=vals.filter(x=>x?.reviewStatus==="Pending QA Review").length;
     $("approvedCount").textContent=vals.filter(x=>x?.reviewStatus==="Approved").length;
     $("inProgressCount").textContent=vals.filter(x=>x?.executedAt && (!x.reviewStatus || x.reviewStatus==="Not Submitted")).length;
-    $("validationPercent").textContent=`${cases.length?Math.round(executed/cases.length*100):0}%`;
+    if($("validationPercent")) $("validationPercent").textContent=`${cases.length?Math.round(executed/cases.length*100):0}%`;
 
     renderValidationDetail(validationSelectedId);refreshIcons();
   }
